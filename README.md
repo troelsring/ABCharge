@@ -1,0 +1,1 @@
+# ABCharge - the package calculates equilibirum conditions with and without correction for ionic strength using Davies' equation. Arbitrary buffers can be included and CO~2~ and albumin are included as default. The enclosed vignette gives some details of the algorithm.
