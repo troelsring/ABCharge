@@ -1,0 +1,17 @@
+Package: ABCharge
+Type: Package
+Title: ABCharge
+Version: 0.1.0
+Author: Troels ring
+Maintainer: Troels Ring <tring@gvdnet.dk>
+Description: Acid-Base using Charge balance minimization. Take ionic strength
+    into account using Davies' equation.
+License: GPL-2
+Encoding: UTF-8
+LazyData: false
+Imports: ggplot2
+RoxygenNote: 6.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

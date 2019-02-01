@@ -1,0 +1,92 @@
+---
+title: "ABCharge package"
+author: "Troels Ring"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ABCharge package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## ABCharge package
+Acid-Base-Charge finds equilibrium conditions for arbitrary fluids which default
+contains CO~2~ and albumin. 
+The main call is
+``` 
+pH_general <- function(Na=0,K=0,Cl=0,Lact=0,Ca=0,Mg=0,PCO2=0,Alb=0,
+WA=list(),TOT,A=A,b=b)
+```
+
+All parameters are entered as M concentrations except PCO2 which comes in mmHg,
+and Alb, which comes in g/l.
+Here Na, K, Cl, Lact, Ca, Mg are strong ions. If further are needed they can be
+entered as buffers, as demonstrated for sulfuric acid, *see example(brom)*.
+A and b are constants from the Davies' equation, often taken to be
+A=0.5108,b=0.1.
+
+WA is meant to make possible the entering of any number of buffers with any number
+of dissociations. The format is
+
+``` 
+WA <- list(buffs=list(),KA=list())
+```
+wherein buffs is a list of buffer names
+and KA is a list of vectors in corresponding sequence, keeping the dissociation
+constants from the highest to the lowest.
+
+As an example, with the data from Tessman et al. *see example(Tessman)* with
+
+```
+ak1 <- 10^-4.76 #acetic acid
+Pk1 <- 10^-2.15 #phosphoric acid
+Pk2 <- 10^-7.21
+Pk3 <- 10^-12.30
+bk1 <- 10^-9.15 #boric acid
+bk2 <- 10^-12.74
+bk3 <- 10^-13.80
+
+WA <- list(buffs=list(),KA=list())
+
+WA$buffs = list("Acet","Phos","Bor") 
+WA$KA <- list(c(ak1),c(Pk1,Pk2,Pk3),c(bk1,bk2,bk3))
+```
+
+Correspondingly, TOTAL is a matrix of *total* buffer concentrations
+
+###pH_general
+The main function returns
+
+* pH: `-log10(H)` final pH taking ionic strength into consideration
+* UNCOR_pH: `-log10(H)` pH  ignoring ionic strength
+* KpH: `-log10(H*F1)` final pH applying activity coefficient for H^+^
+* II: Final ionic strength
+* FII: Ionic strength before applying activity coefficients
+* SPECS: Buffer species concentrations correponsing to `WA$buffs`
+* FSPECS: Buffer species concentrations before first iteration
+* FF1: Final activity coefficients from lowest to highest absolute charge
+* Charge: Final charge balance
+
+
+###Flow of algorithm
+First all activity coefficients are initialized to 1.
+Then pH_general finds start pH by finding the root of current charge balance, as given by function CMB (? CMB).  CMB uses the declared fixed ions, and finds the combined charges on all buffer terms using GET_CH(TOT,FF,WA,H) - see ? geT_CH -
+where TOT is the current row of matrix TOTAL, and FF the current vectorof activity coefficients, and for each buffer, BCharge finds the current total charge as function of TOT,FF,KA and H.
+
+Now, for each buffer the current concentrations of charged species are calculated, and with these together with the charges from fixed ions the ionic strength is calculated.
+
+With the ionic strength, activity coefficients for relevant charges are had via Davies' equation.
+
+Thereby initial activity coefficients are reset, and a new ph is obtained. This is compared with the first pH, and if the difference is greater than 1e-5, iteration continues.
+
+
+
+
+
